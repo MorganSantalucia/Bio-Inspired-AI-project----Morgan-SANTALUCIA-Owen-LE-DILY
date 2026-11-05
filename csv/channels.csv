@@ -1,0 +1,26 @@
+record,channel,unit,fs,sensor_type,prefiltering,physical_min,physical_max,digital_min,digital_max
+r01,Direct_1,uV,1000.0,AgAgCl Electrodes,"LP:150Hz, CombF:50Hz",-3276.8,3276.8,-32768,32767
+r01,Abdomen_1,uV,1000.0,AgAgCl Electrodes,"LP:150Hz, CombF:50Hz",-3276.8,3276.8,-32768,32767
+r01,Abdomen_2,uV,1000.0,AgAgCl Electrodes,"LP:150Hz, CombF:50Hz",-3276.8,3276.8,-32768,32767
+r01,Abdomen_3,uV,1000.0,AgAgCl Electrodes,"LP:150Hz, CombF:50Hz",-3276.8,3276.8,-32768,32767
+r01,Abdomen_4,uV,1000.0,AgAgCl Electrodes,"LP:150Hz, CombF:50Hz",-3276.8,3276.8,-32768,32767
+r04,Direct_1,uV,1000.0,AgAgCl Electrodes,"LP:150Hz, CombF:50Hz",-3276.8,3276.8,-32768,32767
+r04,Abdomen_1,uV,1000.0,AgAgCl Electrodes,"LP:150Hz, CombF:50Hz",-3276.8,3276.8,-32768,32767
+r04,Abdomen_2,uV,1000.0,AgAgCl Electrodes,"LP:150Hz, CombF:50Hz",-3276.8,3276.8,-32768,32767
+r04,Abdomen_3,uV,1000.0,AgAgCl Electrodes,"LP:150Hz, CombF:50Hz",-3276.8,3276.8,-32768,32767
+r04,Abdomen_4,uV,1000.0,AgAgCl Electrodes,"LP:150Hz, CombF:50Hz",-3276.8,3276.8,-32768,32767
+r07,Direct_1,uV,1000.0,AgAgCl Electrodes,"LP:150Hz, CombF:50Hz",-3276.8,3276.8,-32768,32767
+r07,Abdomen_1,uV,1000.0,AgAgCl Electrodes,"LP:150Hz, CombF:50Hz",-3276.8,3276.8,-32768,32767
+r07,Abdomen_2,uV,1000.0,AgAgCl Electrodes,"LP:150Hz, CombF:50Hz",-3276.8,3276.8,-32768,32767
+r07,Abdomen_3,uV,1000.0,AgAgCl Electrodes,"LP:150Hz, CombF:50Hz",-3276.8,3276.8,-32768,32767
+r07,Abdomen_4,uV,1000.0,AgAgCl Electrodes,"LP:150Hz, CombF:50Hz",-3276.8,3276.8,-32768,32767
+r08,Direct_1,uV,1000.0,AgAgCl Electrodes,"LP:150Hz, CombF:50Hz",-3276.8,3276.8,-32768,32767
+r08,Abdomen_1,uV,1000.0,AgAgCl Electrodes,"LP:150Hz, CombF:50Hz",-3276.8,3276.8,-32768,32767
+r08,Abdomen_2,uV,1000.0,AgAgCl Electrodes,"LP:150Hz, CombF:50Hz",-3276.8,3276.8,-32768,32767
+r08,Abdomen_3,uV,1000.0,AgAgCl Electrodes,"LP:150Hz, CombF:50Hz",-3276.8,3276.8,-32768,32767
+r08,Abdomen_4,uV,1000.0,AgAgCl Electrodes,"LP:150Hz, CombF:50Hz",-3276.8,3276.8,-32768,32767
+r10,Direct_1,uV,1000.0,AgAgCl Electrodes,"LP:150Hz, CombF:50Hz",-3276.8,3276.8,-32768,32767
+r10,Abdomen_1,uV,1000.0,AgAgCl Electrodes,"LP:150Hz, CombF:50Hz",-3276.8,3276.8,-32768,32767
+r10,Abdomen_2,uV,1000.0,AgAgCl Electrodes,"LP:150Hz, CombF:50Hz",-3276.8,3276.8,-32768,32767
+r10,Abdomen_3,uV,1000.0,AgAgCl Electrodes,"LP:150Hz, CombF:50Hz",-3276.8,3276.8,-32768,32767
+r10,Abdomen_4,uV,1000.0,AgAgCl Electrodes,"LP:150Hz, CombF:50Hz",-3276.8,3276.8,-32768,32767
