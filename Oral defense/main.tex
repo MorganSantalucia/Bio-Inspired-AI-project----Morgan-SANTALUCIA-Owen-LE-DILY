@@ -1,0 +1,256 @@
+\documentclass{beamer}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{graphicx}
+\usepackage{amsmath}
+
+\usetheme{default}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[frame number]
+\setbeamercolor{subtitle}{fg=black!55}
+\setbeamerfont{subtitle}{size=\small,shape=\itshape}
+
+% ---------------------------------------------------------------
+% Slide 1 : titre, problématique, noms, matricules, année
+% ---------------------------------------------------------------
+\title{Fetal ECG Extraction by Blind Source Separation with Bio-Inspired Optimisation}
+\author{Morgan SANTALUCIA (274326) \and Owen LE DILY (XXXXXX)}
+\subtitle[Fetal ECG extraction with bio-inspired BSS]{\vspace{1.2em}How can bio-inspired optimisation algorithms be used to isolate the fetal cardiac activity from abdominal recordings in which it is mixed with the maternal ECG?}
+\institute{Supervisors: Giovanni Iacca and Markus Vukojevic \\[0.8em] Bio-Inspired Artificial Intelligence \\ Università degli Studi di Trento}
+\date{2026--2027, first semester}
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+% ---------------------------------------------------------------
+% Slide 2 : sujet et état de l'art rapide
+% ---------------------------------------------------------------
+\begin{frame}{Context and related work}
+  \scriptsize
+  \begin{columns}[T]
+    \begin{column}{0.58\textwidth}
+      \textbf{Topic}
+      \begin{itemize}
+        \item Non-invasively measure the baby's vital signs, here its ECG, to support its development and safety
+        \item The challenge: the fetal ECG is buried under the much stronger maternal ECG
+      \end{itemize}
+      \textbf{Why it matters}
+      \begin{itemize}
+        \item Precise fetal ECG today: invasive scalp electrode, during labour only
+        \item Doppler cardiotocography: heart rate only, frequent signal loss
+        \item This information is also valuable during a normal pregnancy
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.40\textwidth}
+      \centering
+      \includegraphics[width=\linewidth]{illustrations/Pregnant_Mom.png}\\[0.2em]
+      {\tiny\itshape A happy mum: Owen and Morgan isolated her fetus's ECG~\cite{ecgpregnancy}}
+    \end{column}
+  \end{columns}
+  \vspace{0.5em}
+  \textbf{Existing approaches}
+  \begin{itemize}
+    \item Adaptive filtering (LMS, RLS): needs a thoracic maternal reference~\cite{widrow1975,haykin2002}
+    \item Maternal template subtraction~\cite{martens2007}; Kalman filtering with an ECG model, single channel~\cite{niknazar2013}
+    \item Blind source separation (ICA, FastICA): multichannel, no reference~\cite{delathauwer2000,hyvarinen2000}; outperforms adaptive filtering~\cite{zarzoso2001}
+  \end{itemize}
+\end{frame}
+
+% ---------------------------------------------------------------
+% Slide 3 : base de données, conditions expérimentales, signaux
+% ---------------------------------------------------------------
+\begin{frame}{Dataset}
+  \begin{columns}[T]
+    \begin{column}{0.56\textwidth}
+      \scriptsize
+      \textbf{Database}
+      \begin{itemize}
+        \item Abdominal and Direct Fetal ECG Database, PhysioNet~\cite{jezewski2012,physionet}
+        \item 5 women in labour (38--41 weeks), one 5-minute recording each
+      \end{itemize}
+      \textbf{Recording conditions}
+      \begin{itemize}
+        \item 4 electrodes around the navel, reference above the pubic symphysis
+        \item Sampled at 1~kHz, band 1--150~Hz, power-line (50~Hz) and baseline drift removed
+      \end{itemize}
+      \textbf{Available signals}
+      \begin{itemize}
+        \item 4 signals from the maternal abdomen
+        \item Direct fetal ECG from a scalp electrode, recorded simultaneously
+        \item Fetal R-wave locations, verified by cardiologists
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.42\textwidth}
+      \centering
+      \vspace{1.5em}
+      \includegraphics[width=\linewidth]{illustrations/Experimental_Conditions.jpg}\\[0.2em]
+      {\tiny\itshape Example of electrode placement, not necessarily the exact setup of the database~\cite{li2017}}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------
+% Slide 4 : aperçu des enregistrements (figure du notebook)
+% ---------------------------------------------------------------
+\begin{frame}{What the recordings look like}
+  \centering
+  \makebox[\textwidth][c]{\includegraphics[width=1.1\textwidth,height=0.78\textheight,keepaspectratio]{illustrations/Raw_window_r01_0-15s.pdf}}\\[0.2em]
+  {\footnotesize Record r01, first 15~s. Direct~1: scalp electrode. Red: annotated fetal QRS.}
+\end{frame}
+
+% ---------------------------------------------------------------
+% Slide 5 : le problème d'optimisation
+% ---------------------------------------------------------------
+\begin{frame}{The optimisation problem}
+  \small
+  \textbf{Mixing model}, on one 15~s window ($N = 15\,000$ samples):
+  {\footnotesize\[
+    \underbrace{\begin{pmatrix} \text{---}\; \mathbf{x}_1 \;\text{---} \\ \vdots \\ \text{---}\; \mathbf{x}_4 \;\text{---} \end{pmatrix}}_{\mathbf{X}\ (4 \times N)\text{: observed}}
+    =
+    \underbrace{\begin{pmatrix} h_{11} & \cdots & h_{1n} \\ \vdots & \ddots & \vdots \\ h_{41} & \cdots & h_{4n} \end{pmatrix}}_{\mathbf{H}\ (4 \times n)\text{: unknown}}
+    \underbrace{\begin{pmatrix} \text{---}\; \mathbf{s}_1 \;\text{---} \\ \vdots \\ \text{---}\; \mathbf{s}_n \;\text{---} \end{pmatrix}}_{\mathbf{S}\ (n \times N)\text{: unknown}}
+    \qquad\Longrightarrow\qquad
+    \mathbf{Y} = \mathbf{W}\mathbf{X} \approx \mathbf{S}
+  \]}
+  \begin{columns}[T]
+    \begin{column}{0.42\textwidth}
+      \textbf{BSS assumptions}
+      \begin{enumerate}
+        \item Instantaneous linear mixture
+        \item $\mathbf{H}$ constant: \mbox{\textbf{15~s windows}}
+        \item $n \le 4$ sources
+        \item Independent, non-Gaussian sources
+      \end{enumerate}
+    \end{column}
+    \begin{column}{0.56\textwidth}
+      \textbf{What we optimise}
+      \begin{itemize}
+        \item $\mathbf{W}$ ($4 \times 4$): 16 real numbers
+        \item An independence criterion $J(\mathbf{W})$ on the outputs
+        \item Candidates: mutual information, non-Gaussianity\ldots
+        \item Physiological constraints: periodic fetal output, 110--160~bpm
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------
+% Slide 6 : filtrage (public : informaticiens, pas experts du TS)
+% ---------------------------------------------------------------
+\begin{frame}{Preprocessing: filtering}
+  \small
+  \begin{itemize}
+    \item \textbf{Keep 5--40~Hz}, where the heartbeats are: removes slow drift (breathing, movements) and fast noise (muscles, mains)
+    \item Same filter on every channel: the mixing model still holds
+  \end{itemize}
+  \vspace{0.3em}
+  \centering
+  \includegraphics[width=\textwidth]{illustrations/Filtering_r01_Abdomen2.pdf}\\
+  {\scriptsize r01, Abdomen 2, first 5~s. Red: annotated fetal QRS.}
+\end{frame}
+
+% ---------------------------------------------------------------
+% Slide 7 : FastICA, méthode de référence
+% ---------------------------------------------------------------
+\begin{frame}{Baseline: FastICA}
+  \small
+  \textbf{Principle}~\cite{hyvarinen2000}
+  {\footnotesize\[
+    \underbrace{\mathbf{X}}_{\text{filtered, 15 s}}
+    \;\longrightarrow\;
+    \underbrace{\text{whitening}}_{\text{decorrelate}}
+    \;\longrightarrow\;
+    \underbrace{\text{fixed-point updates of } \mathbf{W}}_{\text{max.\ non-Gaussianity}}
+    \;\longrightarrow\;
+    \underbrace{\mathbf{Y}}_{\text{4 outputs}}
+  \]}
+  \vspace{0.5em}
+  \begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+      \textbf{Why it is our reference}
+      \begin{itemize}
+        \item Standard ICA algorithm; ICA is a classic approach for fetal ECG~\cite{delathauwer2000,zarzoso2001}
+        \item Fast, ready to use (scikit-learn)
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \textbf{Limits}
+      \begin{itemize}
+        \item Local search: result depends on the initialisation
+        \item One fixed criterion
+        \item Fetal output must be identified afterwards
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------
+% Slides 8 et 9 : (détecteur de battements, résultats FastICA)
+% ---------------------------------------------------------------
+\begin{frame}{Beat detector}
+  \begin{itemize}
+    \item ...
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{FastICA results}
+  \begin{itemize}
+    \item ...
+  \end{itemize}
+\end{frame}
+
+% ---------------------------------------------------------------
+% Slide 10 : méthodes bio-inspirées envisagées
+% ---------------------------------------------------------------
+\begin{frame}{Next step: bio-inspired methods}
+  \small
+  \textbf{Why bio-inspired}
+  \begin{itemize}
+    \item No gradient needed: any criterion $J(\mathbf{W})$, including physiological constraints
+    \item Population-based search, with restarts if needed: less dependent on a single initialisation
+    \item Already explored for BSS: PSO~\cite{kimoto2011}, ACO with minimum mutual information~\cite{zhang2009}
+  \end{itemize}
+  \vspace{0.5em}
+  \textbf{Candidate methods}
+  \begin{itemize}
+    \item Evolution strategies (e.g.\ CMA-ES), differential evolution, particle swarm optimisation
+    \item One individual = one matrix $\mathbf{W}$ (16 real numbers)
+  \end{itemize}
+  \vspace{0.5em}
+  \textbf{Comparison with FastICA}
+  \begin{itemize}
+    \item Same windows, same filtering
+    \item Fetal beats detected vs.\ annotated fetal QRS
+    \item Several runs: mean and spread, computation time
+  \end{itemize}
+\end{frame}
+
+% ---------------------------------------------------------------
+% Sources (figures et articles cités)
+% ---------------------------------------------------------------
+\begin{frame}[allowframebreaks]{References}
+  \tiny
+  \begin{thebibliography}{9}
+    \setbeamertemplate{bibliography item}[text]
+    \bibitem{widrow1975} B. Widrow et al., ``Adaptive noise cancelling: principles and applications,'' \textit{Proc.\ IEEE}, 63(12):1692--1716, 1975.
+    \bibitem{haykin2002} S. Haykin, \textit{Adaptive Filter Theory}, 4th ed., Prentice Hall, 2002.
+    \bibitem{martens2007} S. M. M. Martens, C. Rabotti, M. Mischi, R. J. Sluijter, ``A robust fetal ECG detection method for abdominal recordings,'' \textit{Physiol.\ Meas.}, 28(4):373--388, 2007.
+    \bibitem{niknazar2013} M. Niknazar, B. Rivet, C. Jutten, ``Fetal ECG extraction by extended state Kalman filtering based on single-channel recordings,'' \textit{IEEE Trans.\ Biomed.\ Eng.}, 60(5):1345--1352, 2013.
+    \bibitem{delathauwer2000} L. De Lathauwer, B. De Moor, J. Vandewalle, ``Fetal electrocardiogram extraction by blind source subspace separation,'' \textit{IEEE Trans.\ Biomed.\ Eng.}, 47(5):567--572, 2000.
+    \bibitem{hyvarinen2000} A. Hyv\"arinen, E. Oja, ``Independent component analysis: algorithms and applications,'' \textit{Neural Networks}, 13(4--5):411--430, 2000.
+    \bibitem{zarzoso2001} V. Zarzoso, A. K. Nandi, ``Noninvasive fetal electrocardiogram extraction: blind separation versus adaptive noise cancellation,'' \textit{IEEE Trans.\ Biomed.\ Eng.}, 48(1):12--18, 2001.
+    \bibitem{li2017} R. Li, M. G. Frasch, H.-T. Wu, ``Efficient fetal-maternal ECG signal separation from two channel maternal abdominal ECG via diffusion-based channel selection,'' \textit{Front.\ Physiol.}, 8:277, 2017 (CC BY). Figure, slide 3: lead placement for the ADFECGDB.
+    \bibitem{jezewski2012} J. Jezewski, A. Matonia, T. Kupka, D. Roj, R. Czabanski, ``Determination of the fetal heart rate from abdominal signals: evaluation of beat-to-beat accuracy in relation to the direct fetal electrocardiogram,'' \textit{Biomed.\ Eng./Biomed.\ Tech.}, 57(5):383--394, 2012. Dataset: Abdominal and Direct Fetal ECG Database, PhysioNet, doi:10.13026/C2RP4B.
+    \bibitem{physionet} T. Pollard et al., ``PhysioNet as a global platform for biomedical research,'' \textit{Nature Health}, 2026, doi:10.1038/s44360-026-00096-z.
+    \bibitem{kimoto2011} M. Kimoto, D. Yamanaka, K. Jin'no, ``A blind signal separation method using particle swarm optimization,'' \textit{Proc.\ NOLTA}, Kobe, 2011.
+    \bibitem{zhang2009} N. Zhang, T. Liu, ``The application of ant colony optimization algorithm in linear-combination blind source separation problem,'' \textit{Proc.\ 2nd Int.\ Congress on Image and Signal Processing (CISP)}, 2009, doi:10.1109/CISP.2009.5304441.
+    \bibitem{ecgpregnancy} Eletrocardiograma.org, \url{https://eletrocardiograma.org/eletrocardiograma-in-pregnancy/}, accessed 11 November 2026. Illustration, slide 2.
+  \end{thebibliography}
+\end{frame}
+
+\end{document}
